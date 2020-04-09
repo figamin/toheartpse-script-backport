@@ -29,6 +29,11 @@ int main(int argc, char** argv) {
   bool intext = false;
   while (fread(readbuf, 1, 1, inp) != 0) {
     if (lbls.find(ftell(inp) - 1) != lbls.end()) {
+      if (intext) {
+        printf("\"\n");
+        intext = false;
+      }
+
       for (const auto& lbl : lbls[ftell(inp) - 1]) {
         if (lbl != 0) {
           printf("\n");
