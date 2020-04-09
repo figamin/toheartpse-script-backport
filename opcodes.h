@@ -2,7 +2,7 @@
 #include <tuple>
 #include <unordered_map>
 
-const std::unordered_map<uint8_t, std::tuple<std::string, uint8_t>> opcodes = {
+std::unordered_map<uint8_t, std::tuple<std::string, uint8_t>> opcodes = {
     {0x20, {"End20", 0}},
     {0x21, {"TitleDisplay", -1}},
     {0x23, {"Nazo23", 1}},
