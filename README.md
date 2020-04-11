@@ -3,6 +3,7 @@
 To use:
 
 ```
+cd 99
 make extract decompile compile
 
 mkdir indir outdir
