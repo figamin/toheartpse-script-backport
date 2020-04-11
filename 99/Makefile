@@ -1,3 +1,4 @@
+CFLAGS ?= -Wall -DMAIN
 CXXFLAGS ?= -Wall -std=c++11
 
 decompile: decompile.cc
