@@ -1,8 +1,8 @@
 #include <stdio.h>
 
-#include <boost/algorithm/string.hpp>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -20,7 +20,13 @@ int main(int argc, char** argv) {
       lbls.push_back(databuf.length());
     } else if (readbuf.length() != 0) {
       std::vector<std::string> tokens;
-      boost::algorithm::split(tokens, readbuf, boost::algorithm::is_space());
+      {
+        std::stringstream ss(readbuf);
+        std::string token;
+        while (std::getline(ss, token, ' ')) {
+          tokens.push_back(token);
+        }
+      }
       if (tokens[0] == "UnknownOpcode") {
         databuf += static_cast<uint8_t>(std::stoi(tokens[1], nullptr, 16));
         continue;
