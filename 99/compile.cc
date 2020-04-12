@@ -10,15 +10,18 @@
 #include "ropcodes.h"
 
 int main(int argc, char** argv) {
-  std::ifstream file(argv[1]);
-  std::string readbuf;
-  std::string databuf;
-  std::vector<size_t> lbls;
+  std::ifstream file(argv[1]);  // file to read from
+  std::string readbuf;          // current line
+  std::string databuf;          // data section
+  std::string lblbuf;           // label section
+  std::vector<size_t> lbls;     // offsets for labels
 
   while (std::getline(file, readbuf)) {
     if (readbuf[0] == '*') {
+      // there is a label here; save it
       lbls.push_back(databuf.length());
     } else if (readbuf.length() != 0) {
+      // split the line into tokens delimited by ' '
       std::vector<std::string> tokens;
       {
         std::stringstream ss(readbuf);
@@ -27,10 +30,14 @@ int main(int argc, char** argv) {
           tokens.push_back(token);
         }
       }
+
+      // UnknownOpcode is a special case
       if (tokens[0] == "UnknownOpcode") {
         databuf += static_cast<uint8_t>(std::stoi(tokens[1], nullptr, 16));
         continue;
       }
+
+      // Text is a literal string delimited by quotation marks
       if (tokens[0] == "Text") {
         for (auto it = ++(tokens[1].begin()); it != tokens[1].end();) {
           std::string ch;
@@ -40,6 +47,7 @@ int main(int argc, char** argv) {
           }
 
           // proper handling of Unicode codepoints
+          // see https://en.wikipedia.org/wiki/UTF-8#Description
           if ((ch[0] & 0xc0) == 0xc0) {
             ch += *(it++);
           }
@@ -47,38 +55,49 @@ int main(int argc, char** argv) {
             ch += *(it++);
           }
 
+          // rfonttable maps a std::string containing 1 character to its index
+          // in the font table
           databuf += static_cast<uint8_t>(rfonttable.at(ch) >> 8);
           databuf += static_cast<uint8_t>(rfonttable.at(ch));
         }
         continue;
       }
+
+      // ropcodes maps an opcode's mnemonic to its binary representation
       auto op = ropcodes.at(tokens[0]);
       databuf += std::get<0>(op);
+
+      // also capture the opcode's arguments
       for (auto it = ++(tokens.begin()); it != tokens.end(); it++) {
         databuf += static_cast<uint8_t>(std::stoi(*it, nullptr, 16));
       }
     }
   }
 
-  std::string lblbuf;
+  // first write the total number of labels
   lblbuf += static_cast<uint8_t>(lbls.size());
-  lblbuf += static_cast<uint8_t>(static_cast<uint16_t>(lbls.size()) >> 8);
+  lblbuf += static_cast<uint8_t>(lbls.size() >> 8);
 
+  // then write the label offsets
   for (auto lbl : lbls) {
     lbl += lbls.size() * 2;
+    // DATA portion contains an extra 2 bytes in the header
     lbl += (std::string(argv[1]).find(".DATA") != std::string::npos) ? 4 : 2;
     lblbuf += static_cast<uint8_t>(lbl);
-    lblbuf += static_cast<uint8_t>(static_cast<uint16_t>(lbl >> 8));
+    lblbuf += static_cast<uint8_t>(lbl >> 8);
   }
 
+  // write the total file length if it's DATA portion
   if (std::string(argv[1]).find(".DATA") != std::string::npos) {
     size_t pos = databuf.length() + lbls.size() * 2 + 4;
     lblbuf += static_cast<uint8_t>(pos);
-    lblbuf += static_cast<uint8_t>(static_cast<uint16_t>(pos >> 8));
+    lblbuf += static_cast<uint8_t>(pos >> 8);
   }
 
+  // write the label and data sections to stdout
   std::cout << lblbuf;
   std::cout << databuf;
+
   return 0;
 }
 
