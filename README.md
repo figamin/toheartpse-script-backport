@@ -16,7 +16,7 @@ done
 
 # modify the decompiled scripts in `outdir/`
 
-cd ../indir/
+cd ../outdir/
 for file in *.DATA *.TEXT; do
   ../compile ${file} ../indir/${file}
 done
