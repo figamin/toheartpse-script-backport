@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
 
       // ropcodes maps an opcode's mnemonic to its binary representation
       auto op = ropcodes.at(tokens[0]);
-      databuf += std::get<0>(op);
+      databuf += op;
 
       // also capture the opcode's arguments
       for (auto it = ++(tokens.begin()); it != tokens.end(); it++) {
