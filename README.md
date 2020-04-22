@@ -3,7 +3,7 @@
 To use:
 
 ```
-cd 99
+cd LVNS3
 make extract decompile compile
 
 mkdir indir outdir
