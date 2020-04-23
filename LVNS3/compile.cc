@@ -39,12 +39,13 @@ int main(int argc, char** argv) {
 
       // Text is a literal string delimited by quotation marks
       if (tokens[0] == "Text") {
-        for (auto it = ++(tokens[1].begin()); it != tokens[1].end();) {
+        size_t firstq = readbuf.find("\"");
+        size_t lastq = readbuf.rfind("\"");
+        std::string text = readbuf.substr(firstq+1, lastq-firstq-1);
+
+        for (auto it = text.begin(); it != text.end();) {
           std::string ch;
           ch += *(it++);
-          if (ch == "\"") {
-            break;
-          }
 
           // proper handling of Unicode codepoints
           // see https://en.wikipedia.org/wiki/UTF-8#Description
@@ -57,8 +58,14 @@ int main(int argc, char** argv) {
 
           // rfonttable maps a std::string containing 1 character to its index
           // in the font table
-          databuf += static_cast<uint8_t>(rfonttable.at(ch) >> 8);
-          databuf += static_cast<uint8_t>(rfonttable.at(ch));
+          try {
+            auto code = rfonttable.at(ch);
+            databuf += static_cast<uint8_t>(code >> 8);
+            databuf += static_cast<uint8_t>(code);
+          } catch (const std::exception& e) {
+            std::cout << "Couldn't lookup character " << ch;
+            return 1;
+          }
         }
         continue;
       }
