@@ -1,0 +1,24 @@
+{
+	"files": [
+		{
+			"path": "script-files/remake-script-jp-chunk.txt",
+			"bookmarks": [
+				{
+					"line": 82,
+					"column": 961,
+					"label": "start"
+				}
+			]
+		},
+		{
+			"path": "script-files/remake-script-en-chunk.txt",
+			"bookmarks": [
+				{
+					"line": 66,
+					"column": 1845,
+					"label": "start"
+				}
+			]
+		}
+	]
+}
